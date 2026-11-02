@@ -13,23 +13,60 @@ joinBtn.addEventListener("click", (e) => {
   if (firstInput) firstInput.focus();
 });
 
-// ---------- LOGIN BUTTON ----------
-const loginBtn = document.getElementById("login-btn");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const loginError = document.getElementById("login-error");
+// ---------- BOOKING FORM ----------
+const bookBtn = document.getElementById("book-btn");
+const formMsg = document.getElementById("form-msg");
+const dateInput = document.getElementById("date");
 
-loginBtn.addEventListener("click", (e) => {
+// stop people from picking a past date
+dateInput.min = new Date().toISOString().split("T")[0];
+
+function showMsg(text, color) {
+  formMsg.textContent = text;
+  formMsg.style.color = color;
+}
+
+bookBtn.addEventListener("click", async (e) => {
   e.preventDefault();
 
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
+  const data = {
+    name: document.getElementById("name").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    service: document.getElementById("service").value,
+    date: dateInput.value,
+    time: document.getElementById("time").value,
+    message: document.getElementById("message").value.trim(),
+  };
 
-  if (email === "" || password === "") {
-    loginError.textContent = "Please fill in both fields.";
+  if (!data.name || !data.email || !data.service || !data.date || !data.time) {
+    showMsg("Please fill in all the fields.", "red");
     return;
   }
 
-  loginError.textContent = "";
-  alert("Login successful!"); // placeholder for now
+  if (!data.email.includes("@") || !data.email.includes(".")) {
+    showMsg("Please enter a valid email.", "red");
+    return;
+  }
+
+  bookBtn.disabled = true;
+  showMsg("Sending...", "white");
+
+  try {
+    const res = await fetch("https://formspree.io/f/myeeblaz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (res.ok) {
+      showMsg("Appointment request sent! I'll get back to you soon.", "#4cd964");
+      document.querySelectorAll(".form input, .form select, .form textarea").forEach((el) => (el.value = ""));
+    } else {
+      showMsg("Something went wrong. Please try again.", "red");
+    }
+  } catch (err) {
+    showMsg("Network error. Please try again.", "red");
+  }
+
+  bookBtn.disabled = false;
 });
