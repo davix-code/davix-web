@@ -271,3 +271,7 @@ ul li a:hover{
     color: #ff7200;
         transition: color 0.3s;
 }
+.form.highlight {
+  box-shadow: 0 0 20px orange;
+  transition: box-shadow 0.3s ease;
+}
